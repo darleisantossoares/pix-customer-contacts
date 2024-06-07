@@ -2,30 +2,49 @@
   (:require [io.pedestal.http :as http]
             [io.pedestal.http.body-params :as body-params]
             [ring.util.response :as ring-resp]
-            [pix-customer-contacts.handlers :as handlers]))
+            [cheshire.core :as json]
+            [pix-customer-contacts.handlers :as handlers])
+  (:import (java.util UUID)))
 
 (defn get-customer-contacts
   [request]
   (let [customer-id (get-in request [:path-params :customer-id])]
-    (http/json-response (handlers/get-customer-contacts customer-id))))
+    (http/json-response (handlers/get-customer-contacts (UUID/fromString customer-id)))))
+
+#_(defn create-customer-contact
+  [request]
+  (let [customer-id (get-in request [:path-params :customer-id])
+        body (:json-params request)]
+    (ring-resp/created "" (handlers/create-customer-contact customer-id body))))
+
+(defn keywordize-keys-with-namespace [namespace m]
+  (into {}
+        (for [[k v] m]
+          [(keyword namespace (name k)) v])))
 
 (defn create-customer-contact
   [request]
   (let [customer-id (get-in request [:path-params :customer-id])
-        body (:json-params request)]
-    (ring-resp/created "" (handlers/create-customer-contact customer-id body))))
+        body (json/parse-string (slurp (:body request)) true)
+        namespaced-body (keywordize-keys-with-namespace "contact" body)
+        customer-uuid (UUID/fromString customer-id)
+        contact-id (UUID/randomUUID)]
+    (handlers/create-customer-contact customer-uuid (assoc namespaced-body :contact/customer-id customer-uuid :contact/id contact-id))
+    (ring-resp/created "" {:id contact-id})))
 
 (defn get-customer-contact
- [request]
- (let [customer-id (get-in request [:path-params :customer-id])
-       contact-id (get-in request [:path-params :customer-id])]
-   (http/json-response (handlers/get-customer-contact customer-id contact-id))))
+  [request]
+  (let [customer-id (get-in request [:path-params :customer-id])
+        contact-id (get-in request [:path-params :customer-id])]
+    (http/json-response (handlers/get-customer-contact customer-id contact-id))))
 
 (defn update-customer-contact
   [request]
   (let [customer-id (get-in request [:path-params :customer-id])
-        body (:json-params request)]
-    (ring-resp/created "" (handlers/create-customer-contact customer-id body))))
+        contact-id (get-in request [:path-params :contact-id])
+        body (json/parse-string (slurp (:body request)) true)
+        namespaced-body (keywordize-keys-with-namespace "contact" body)]
+    (ring-resp/created "" (handlers/update-customer-contact customer-id contact-id namespaced-body))))
 
 (defn get-customer-contact-bank-accounts
   [request]
@@ -49,8 +68,8 @@
 
 (def common-interceptors [(body-params/body-params) http/html-body])
 
-(def routes #{["/api/customers/:customer-id/contacts" :get (conj common-interceptors `get-customer-contacts)]
-              ["/api/customers/:customer-id/contacts" :post (conj common-interceptors `create-customer-contact)]
+(def routes #{["/api/customers/:customer-id/contacts" :get `get-customer-contacts]
+              ["/api/customers/:customer-id/contacts" :post  `create-customer-contact]
               ["/api/customers/:customer-id/contacts/:contact-id/" :put `update-customer-contact]
               ["/api/customers/:customer-id/contacts/:contact-id" :get `get-customer-contact]
               ["/api/customers/:customer-id/contacts/:contact-id/bank-accounts" :get `get-customer-contact-bank-accounts]

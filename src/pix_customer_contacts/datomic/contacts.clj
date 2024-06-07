@@ -1,7 +1,8 @@
 (ns pix-customer-contacts.datomic.contacts
   (:require [datomic.api :as d]))
 
-(def conn (d/connect "datomic:dev://localhost:4334/pix-customers-contacts"))
+
+(def conn (d/connect "datomic:dev://localhost:4334/pix-customer-contacts"))
 
 (defn get-contacts-by-customer-id
   ([customer-id]
@@ -10,7 +11,7 @@
    (d/q '[:find (pull ?a [*])
           :in $ ?customer-id
           :where [?a :contact/customer-id ?customer-id]]
-        (db) customer-id)))
+        db customer-id)))
 
 (defn get-customer-contact
   [customer-id contact-id]
@@ -29,22 +30,8 @@
        (d/db conn) contact-id))
 
 (defn insert-data [data]
-  @(d/transact conn data))
+  @(d/transact conn [data]))
 
-(defn upsert
-  [contact conn]
-  (d/transact conn contact))
-
-
-(defn get-schema
-  [conn]
-  (d/q '[:find ?e ?ident ?value-type ?cardinality ?unique
-         :where
-         [?e :db/ident ?ident]
-         [?e :db/valueType ?value-type]
-         [?e :db/cardinality ?cardinality]
-         (optional-attr ?e :db/unique ?unique)]
-       (d/db conn)))
 
 
 

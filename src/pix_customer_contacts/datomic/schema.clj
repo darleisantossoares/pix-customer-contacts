@@ -52,11 +52,7 @@
    (d/create-database uri)
    (println "database created")))
 
-
-(create-database)
-
 (def conn (d/connect db-uri))
-
 
 (defn create-schema
   ([]
