@@ -36,3 +36,11 @@ repl-port
 out/
 build/
 
+
+# caches
+.clj-kondo/*
+.clj-kondo
+
+.lsp/*
+.lsp
+
