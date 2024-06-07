@@ -2,6 +2,8 @@
   (:require [datomic.api :as d]))
 
 
+(def db-uri "datomic:dev://localhost:4334/pix-customer-contacts")
+
 (def contact [{:db/ident :contact/id
                :db/valueType :db.type/uuid
                :db/cardinality :db.cardinality/one
@@ -45,9 +47,18 @@
 (def schema (into [] (concat contact contact-bank-account)))
 
 (defn create-database
-  [db-uri]
-  (d/create-database db-uri))
+  ([]
+   (create-database db-uri))
+  ([uri]
+   (d/create-database uri)
+   (println "database created")))
+
+(def conn (d/connect db-uri))
+
 
 (defn create-schema
-  [connection schema]
-  @(d/transact connection schema))
+  ([]
+   (create-schema conn schema))
+  ([connection db-schema]
+   (println "transacting the schema")
+   @(d/transact connection db-schema)))

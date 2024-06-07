@@ -52,7 +52,6 @@
 (def routes #{["/api/customers/:customer-id/contacts" :get (conj common-interceptors `get-customer-contacts)]
               ["/api/customers/:customer-id/contacts" :post (conj common-interceptors `create-customer-contact)]
               ["/api/customers/:customer-id/contacts/:contact-id/" :put `update-customer-contact]
-              ["/api/customers/:customer-id/contacts/:contact-id/" :post `update-customer-contact]
               ["/api/customers/:customer-id/contacts/:contact-id" :get `get-customer-contact]
               ["/api/customers/:customer-id/contacts/:contact-id/bank-accounts" :get `get-customer-contact-bank-accounts]
               ["/api/customers/:customer-id/contacts/:contact-id/bank-accounts" :post `create-customer-contact-bank-account]

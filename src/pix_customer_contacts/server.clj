@@ -2,7 +2,8 @@
   (:gen-class) ; for -main method in uberjar
   (:require [io.pedestal.http :as server]
             [io.pedestal.http.route :as route]
-            [pix-customer-contacts.service :as service]))
+            [pix-customer-contacts.service :as service]
+            [pix-customer-contacts.datomic.schema :as schema]))
 
 ;; This is an adapted service map, that can be started and stopped
 ;; From the REPL you can call server/start and server/stop on this service
@@ -29,9 +30,13 @@
       server/create-server
       server/start))
 
+
+
 (defn -main
   "The entry-point for 'lein run'"
   [& args]
+  (schema/create-database)
+  (schema/create-schema)
   (println "\nCreating your server...")
   (server/start runnable-service))
 
