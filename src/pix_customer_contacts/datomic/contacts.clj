@@ -47,6 +47,4 @@
        (d/db conn)))
 
 
-(d/connect "datomic:dev://localhost:4334/pix-customers-contacts")
 
-(get-schema conn)

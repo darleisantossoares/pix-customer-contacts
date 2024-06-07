@@ -1,7 +1,6 @@
 (ns pix-customer-contacts.datomic.schema
   (:require [datomic.api :as d]))
 
-
 (def db-uri "datomic:dev://localhost:4334/pix-customer-contacts")
 
 (def contact [{:db/ident :contact/id
@@ -53,6 +52,9 @@
    (d/create-database uri)
    (println "database created")))
 
+
+(create-database)
+
 (def conn (d/connect db-uri))
 
 
@@ -62,3 +64,5 @@
   ([connection db-schema]
    (println "transacting the schema")
    @(d/transact connection db-schema)))
+
+
